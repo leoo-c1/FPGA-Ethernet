@@ -24,6 +24,10 @@ module eth_parser #(
 
     logic [16:0] ip_checksum_calc;      // The calculated checksum of the IP header
     logic [31:0] ip_checksum_acc;       // 32 bits to handle overflow carries
+
+    logic [16:0] udp_checksum_calc;     // The calculated checksum of the UDP header
+    logic [31:0] udp_checksum_acc;      // 32 bits to handle overflow carries
+
     logic [15:0] current_word;          // Temporary holder for the 16-bit word
 
     logic [15:0] byte_counter = 0;      // Counts the number of bytes we have received
@@ -126,29 +130,65 @@ module eth_parser #(
                     byte_counter <= byte_counter + 1;
                 else begin
                     byte_counter <= 0;
+                    current_word <= 16'b0;
 
-                    // Check if dest_ip matches FPGA's IP
-                    if ({ip_header_content.dest_ip[0:2], received_byte} == FPGA_IP)
-                        state <= IP_CHECK;
-                    else
-                        state <= IDLE;
+                    // Go to the check state (to check dest_ip and IP checksum)
+                    state <= IP_CHECK;
                 end
             end else if (state == IP_CHECK) begin
                 // Add the carry-over in the checksum to the bottom 16 bits
-                ip_checksum_calc <= ip_checksum_acc[31:16] + ip_checksum_acc[15:0];
+                ip_checksum_calc = ip_checksum_acc[31:16] + ip_checksum_acc[15:0];
                 // Check if there is still 1 bit of carry-over left over
                 if (ip_checksum_calc[16])
-                    ip_checksum_calc <= ~(ip_checksum_calc[15:0] + 1'b1);
+                    ip_checksum_calc = ~(ip_checksum_calc[15:0] + 1'b1);
 
-                // Check if checksum is the valid 0x0000
-                if (ip_checksum_calc == 16'h0000)
+                // Check if checksum is the valid 0x0000 and dest_ip matches the FPGA's IP
+                if ((ip_checksum_calc == 16'h0000)
+                    & ({>>{ip_header_content.dest_ip}} == FPGA_IP))
                     state <= UDP_HEADER;
                 else
                     state <= IDLE;
 
             end else if (state == UDP_HEADER) begin
+                // Assign bytes based on the current byte counter
+                case (byte_counter)
+                    0: udp_header_content.src_port[0] <= received_byte;
+                    1: udp_header_content.src_port[1] <= received_byte;
 
-            end else (if state == PAYLOAD) begin
+                    2: dp_header_content.dest_port[0] <= received_byte;
+                    3: dp_header_content.dest_port[1] <= received_byte;
+
+                    4: dp_header_content.udp_len[0] <= received_byte;
+                    5: dp_header_content.udp_len[1] <= received_byte;
+
+                    6: dp_header_content.udp_csum[0] <= received_byte;
+                    7: dp_header_content.udp_csum[1] <= received_byte;
+                endcase
+
+                if (byte_counter[0] == 1'b0) begin
+                    // If the current byte is even, it is the MSByte of the 16-bit word
+                    current_word[15:8] <= received_byte;
+                end 
+                else begin
+                    // The current byte is odd, so it is the LSByte of the 16-bit word
+                    current_word[7:0] <= received_byte;     // Complete the word
+                    udp_checksum_acc <= udp_checksum_acc + {current_word[15:8], received_byte};
+                end
+
+                if (byte_counter < 7)
+                    byte_counter <= byte_counter + 1;
+                else begin
+                    byte_counter <= 0;
+                    current_word <= 16'b0;
+
+                    // Go to the check state (to check dest_port and UDP checksum)
+                    state <= UDP_CHECK;
+                end
+
+            end else if (state == UDP_CHECK) begin
+                
+
+            end else if (state == PAYLOAD) begin
 
             end else if (state == FCS) begin
 

@@ -11,7 +11,7 @@ module eth_parser #(
     input logic [7:0] received_byte,    // The byte of data we have received from the LAN8720
     input logic byte_valid,             // Pulses for one clock cycle on valid byte
 
-    output logic payload,               // The payload data
+    output logic [7:0] payload,         // The payload data
     output logic payload_valid,         // Whether we are currently receiving payload data
     output logic payload_last           // Pulses on the last byte of our payload data
     );

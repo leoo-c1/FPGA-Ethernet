@@ -16,6 +16,10 @@ module eth_parser #(
     output logic data_last              // Pulses on the last byte of our payload data
     );
 
+    frame_header frame_header_content;  // Each component of the ethernet frame header
+    ip_header ip_header_content;        // Each component of the IP packet header
+    udp_header udp_header_content;      // Each component of the UDP datagram header
+
     eth_states state;                   // The current ethernet state we are in
 
     logic [15:0] byte_counter = 0;      // Counts the number of bytes we have received
@@ -29,11 +33,38 @@ module eth_parser #(
             byte_counter <= 0;
         end else begin
             if (state == IDLE) begin
+                data_valid <= 1'b0;
+                data_last <= 1'b0;
+                byte_counter <= 0;
                 if (byte_valid) begin
-                    if (received_byte == )
-                end
+                    // If we just received the SFD
+                    if (received_byte == 8'hD5)
+                        state <= ETH_HEADER;        // Get ready to start reading the frame header
+                    else
+                        state <= IDLE;
+                end else
+                    state <= IDLE;
             end else if (state == ETH_HEADER) begin
+                // Assign bytes based on the current byte counter
+                if (byte_valid) begin
+                    if (byte_counter < 6)
+                        frame_header_content.dest_mac[byte_counter] <= received_byte;
+                    else if (byte_counter < 12)
+                        frame_header_content.src_mac[byte_counter-6] <= received_byte;
+                    else if (byte_counter < 14)
+                        frame_header_content.ethertype[byte_counter-12] <= received_byte;
 
+                    if (byte_counter < 13)
+                        byte_counter <= byte_counter + 1;
+                    else begin
+                        byte_counter <= 0;
+                        // Make sure the destination mac is ours and ethertype is 0x0800 (IPv4)
+                        if (({>>{frame_header_content.dest_mac}} == FPGA_MAC)
+                            & ({frame_header_content.ethertype[0], received_byte} == 16'h0800))
+                            state <= IP_HEADER;
+                    end
+                    
+                end
             end else (if state == IP_HEADER) begin
 
             end else if (state == UDP_HEADER) begin

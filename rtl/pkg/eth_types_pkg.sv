@@ -34,7 +34,6 @@ package eth_types_pkg
 
     typedef enum {
         IDLE,
-        PREAMBLE_SFD,  // Waiting for 0xD5
         ETH_HEADER,    // Reading MACs and EtherType
         IP_HEADER,     // Reading IP header
         UDP_HEADER,    // Reading UDP header

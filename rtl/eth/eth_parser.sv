@@ -200,11 +200,11 @@ module eth_parser #(
                         data_last <= 1'b0;
                     else if (byte_counter == {>>{udp_header_content.udp_len}} - 16'd9) begin
                         byte_counter <= 0;
-                        data_last <= 1'b1
+                        data_last <= 1'b1;
                         state <= FCS;
                     end
-
-                end
+                end else
+                    data_valid <= 1'b0;
 
             end else if (state == FCS) begin
                 if (byte_valid) begin

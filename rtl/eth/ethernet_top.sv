@@ -9,7 +9,7 @@ module ethernet_top (
     input logic rx0,                    // The data on the first receiving pin
     input logic rx1,                    // The data on the second receiving pin
 
-    output logic payload,               // The payload data
+    output logic [7:0] payload,         // The payload data
     output logic payload_valid,         // Whether we are currently receiving payload data
     output logic payload_last           // Pulses on the last byte of our payload data
     );

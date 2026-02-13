@@ -39,8 +39,7 @@ package eth_types_pkg
         IP_CHECK,       // Calculating the IP header checksum
         UDP_HEADER,     // Reading UDP header
         PAYLOAD,        // Reading the payload data
-        FCS,            // Checking the CRC
-        DONE            // Sends a pulse for valid output
+        FCS             // Checking the CRC
     } eth_states;
 
 endpackage

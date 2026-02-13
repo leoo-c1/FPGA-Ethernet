@@ -33,13 +33,13 @@ package eth_types_pkg
     } udp_header;
 
     typedef enum {
-        IDLE,
-        ETH_HEADER,    // Reading MACs and EtherType
-        IP_HEADER,     // Reading IP header
-        UDP_HEADER,    // Reading UDP header
-        PAYLOAD,       // Reading the payload data
-        FCS,           // Checking the CRC
-        DONE           // Sends a pulse for valid output
+        IDLE,           // Haven't received the SFD yet
+        ETH_HEADER,     // Reading MACs and EtherType
+        IP_HEADER,      // Reading IP header
+        UDP_HEADER,     // Reading UDP header
+        PAYLOAD,        // Reading the payload data
+        FCS,            // Checking the CRC
+        DONE            // Sends a pulse for valid output
     } eth_states;
 
 endpackage

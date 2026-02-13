@@ -11,9 +11,9 @@ module eth_parser #(
     input logic [7:0] received_byte,    // The byte of data we have received from the LAN8720
     input logic byte_valid,             // Pulses for one clock cycle on valid byte
 
-    output logic data,                  // The payload data
-    output logic data_valid,            // Whether we are currently sending payload data
-    output logic data_last              // Pulses on the last byte of our payload data
+    output logic payload,               // The payload data
+    output logic payload_valid,         // Whether we are currently receiving payload data
+    output logic payload_last           // Pulses on the last byte of our payload data
     );
 
     frame_header frame_header_content;  // Each component of the ethernet frame header
@@ -31,14 +31,14 @@ module eth_parser #(
     always_ff @ (posedge clk or negedge resetn) begin
         if (!resetn) begin
             state <= IDLE;
-            data <= 8'b0;
-            data_valid <= 1'b0;
-            data_last <= 1'b0;
+            payload <= 8'b0;
+            payload_valid <= 1'b0;
+            payload_last <= 1'b0;
             byte_counter <= 0;
         end else begin
             if (state == IDLE) begin
-                data_valid <= 1'b0;
-                data_last <= 1'b0;
+                payload_valid <= 1'b0;
+                payload_last <= 1'b0;
                 byte_counter <= 0;
                 if (byte_valid) begin
                     // If we just received the SFD
@@ -192,24 +192,24 @@ module eth_parser #(
 
             end else if (state == PAYLOAD) begin
                 if (byte_valid) begin
-                    data_valid <= 1'b1;
-                    data <= received_byte;
+                    payload_valid <= 1'b1;
+                    payload <= received_byte;
 
                     if (byte_counter < {>>{udp_header_content.udp_len}} - 16'd9)
                         byte_counter <= byte_counter + 1;
-                        data_last <= 1'b0;
+                        payload_last <= 1'b0;
                     else if (byte_counter == {>>{udp_header_content.udp_len}} - 16'd9) begin
                         byte_counter <= 0;
-                        data_last <= 1'b1;
+                        payload_last <= 1'b1;
                         state <= FCS;
                     end
                 end else
-                    data_valid <= 1'b0;
+                    payload_valid <= 1'b0;
 
             end else if (state == FCS) begin
                 if (byte_valid) begin
-                    data_last <= 1'b0;
-                    data_valid <= 1'b0;
+                    payload_last <= 1'b0;
+                    payload_valid <= 1'b0;
 
                     if (byte_counter < 4)
                         byte_counter <= byte_counter + 1;

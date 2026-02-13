@@ -178,7 +178,7 @@ module eth_parser #(
                     current_word <= 16'b0;
 
                     // Check if dest_port matches the FPGA's port
-                    if ({udp_header_content.udp_csum[0], received_byte} == FPGA_PORT)
+                    if ({>>{udp_header_content.dest_port}} == FPGA_PORT)
                         state <= PAYLOAD;
                 end
 

@@ -1,6 +1,6 @@
 module rmii_handler (
     input logic clk,                    // 50MHz LAN8720 clock
-    input logic resetn,                 // Reset button
+    input logic resetn,                 // Reset button (active low)
 
     input logic data_valid,             // Flag to indicate we are receiving valid data
 
@@ -8,7 +8,7 @@ module rmii_handler (
     input logic rx1,                    // The data on the second receiving pin
 
     output logic [7:0] received_byte,   // The 8-bit data made by combining both data pins' inputs
-    output logic byte_valid             // Pulses when we just received a valid byte
+    output logic byte_valid             // Pulses for one clock cycle on valid byte
     );
 
     parameter max_bit_count = 8;        // We want to count a total of 8 bits

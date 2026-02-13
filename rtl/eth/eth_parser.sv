@@ -24,10 +24,6 @@ module eth_parser #(
 
     logic [16:0] ip_checksum_calc;      // The calculated checksum of the IP header
     logic [31:0] ip_checksum_acc;       // 32 bits to handle overflow carries
-
-    logic [16:0] udp_checksum_calc;     // The calculated checksum of the UDP header
-    logic [31:0] udp_checksum_acc;      // 32 bits to handle overflow carries
-
     logic [15:0] current_word;          // Temporary holder for the 16-bit word
 
     logic [15:0] byte_counter = 0;      // Counts the number of bytes we have received
@@ -181,23 +177,10 @@ module eth_parser #(
                     byte_counter <= 0;
                     current_word <= 16'b0;
 
-                    // Go to the check state (to check dest_port and UDP checksum)
-                    state <= UDP_CHECK;
+                    // Check if dest_port matches the FPGA's port
+                    if ({udp_header_content.udp_csum[0], received_byte} == FPGA_PORT)
+                        state <= PAYLOAD;
                 end
-
-            end else if (state == UDP_CHECK) begin
-                // Add the carry-over in the checksum to the bottom 16 bits
-                udp_checksum_calc = udp_checksum_acc[31:16] + udp_checksum_acc[15:0];
-                // Check if there is still 1 bit of carry-over left over
-                if (udp_checksum_calc[16])
-                    udp_checksum_calc = ~(udp_checksum_calc[15:0] + 1'b1);
-
-                // Check if checksum is the valid 0x0000 and dest_port matches the FPGA's port
-                if ((udp_checksum_calc == 16'h0000)
-                    & ({>>{udp_header_content.dest_port}} == FPGA_PORT))
-                    state <= PAYLOAD;
-                else
-                    state <= IDLE;
 
             end else if (state == PAYLOAD) begin
 

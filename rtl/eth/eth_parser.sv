@@ -155,14 +155,14 @@ module eth_parser #(
                     0: udp_header_content.src_port[0] <= received_byte;
                     1: udp_header_content.src_port[1] <= received_byte;
 
-                    2: dp_header_content.dest_port[0] <= received_byte;
-                    3: dp_header_content.dest_port[1] <= received_byte;
+                    2: udp_header_content.dest_port[0] <= received_byte;
+                    3: udp_header_content.dest_port[1] <= received_byte;
 
-                    4: dp_header_content.udp_len[0] <= received_byte;
-                    5: dp_header_content.udp_len[1] <= received_byte;
+                    4: udp_header_content.udp_len[0] <= received_byte;
+                    5: udp_header_content.udp_len[1] <= received_byte;
 
-                    6: dp_header_content.udp_csum[0] <= received_byte;
-                    7: dp_header_content.udp_csum[1] <= received_byte;
+                    6: udp_header_content.udp_csum[0] <= received_byte;
+                    7: udp_header_content.udp_csum[1] <= received_byte;
                 endcase
 
                 if (byte_counter[0] == 1'b0) begin
@@ -186,7 +186,18 @@ module eth_parser #(
                 end
 
             end else if (state == UDP_CHECK) begin
-                
+                // Add the carry-over in the checksum to the bottom 16 bits
+                udp_checksum_calc = udp_checksum_acc[31:16] + udp_checksum_acc[15:0];
+                // Check if there is still 1 bit of carry-over left over
+                if (udp_checksum_calc[16])
+                    udp_checksum_calc = ~(udp_checksum_calc[15:0] + 1'b1);
+
+                // Check if checksum is the valid 0x0000 and dest_port matches the FPGA's port
+                if ((udp_checksum_calc == 16'h0000)
+                    & ({>>{udp_header_content.dest_port}} == FPGA_PORT))
+                    state <= PAYLOAD;
+                else
+                    state <= IDLE;
 
             end else if (state == PAYLOAD) begin
 

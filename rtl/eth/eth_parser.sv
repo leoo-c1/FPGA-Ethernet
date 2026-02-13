@@ -185,6 +185,8 @@ module eth_parser #(
                         // Check if dest_port matches the FPGA's port
                         if ({>>{udp_header_content.dest_port}} == FPGA_PORT)
                             state <= PAYLOAD;
+                        else
+                            state <= IDLE;
                     end
                 end
 
@@ -196,7 +198,7 @@ module eth_parser #(
                     if (byte_counter < {>>{udp_header_content.udp_len - 16'd9}})
                         byte_counter <= byte_counter + 1;
                         data_last <= 1'b0;
-                    else if (byte_counter == {>>{udp_header_content.udp_len - 16'd9}}) begin
+                    else if (byte_counter == {>>{udp_header_content.udp_len}} - 16'd9) begin
                         data_last <= 1'b1;
                         state <= FCS;
                     end

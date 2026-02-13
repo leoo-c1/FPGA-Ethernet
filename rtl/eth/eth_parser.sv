@@ -22,6 +22,10 @@ module eth_parser #(
 
     eth_states state;                   // The current ethernet state we are in
 
+    logic [16:0] ip_checksum_calc;      // The calculated checksum of the IP header
+    logic [31:0] ip_checksum_acc;       // 32 bits to handle overflow carries
+    logic [15:0] current_word;          // Temporary holder for the 16-bit word
+
     logic [15:0] byte_counter = 0;      // Counts the number of bytes we have received
 
     always_ff @ (posedge clk or negedge resetn) begin
@@ -63,9 +67,84 @@ module eth_parser #(
                             & ({frame_header_content.ethertype[0], received_byte} == 16'h0800))
                             state <= IP_HEADER;
                     end
-                    
                 end
+
             end else (if state == IP_HEADER) begin
+                // Assign bytes based on the current byte counter
+                case (byte_counter)
+                    0: begin
+                        ip_header_content.version <= received_byte[7:4];
+                        ip_header_content.header_len <= received_byte[3:0];
+                    end
+
+                    1: begin
+                        ip_header_content.dscp <= received_byte[7:2];
+                        ip_header_content.ecn <= received_byte[1:0];
+                    end
+
+                    2: ip_header_content.total_len[0] <= received_byte;
+                    3: ip_header_content.total_len[1] <= received_byte;
+
+                    4: ip_header_content.identification[0] <= received_byte;
+                    5: ip_header_content.identification[1] <= received_byte;
+
+                    6: begin
+                        ip_header_content.flags <= received_byte[7:5];
+                        ip_header_content.frag_offset[12:8] <= received_byte[4:0];
+                    end
+                    7: ip_header_content.frag_offset[7:0] <= received_byte;
+
+                    8: ip_header_content.ttl <= received_byte;
+
+                    9: ip_header_content.protocol <= received_byte;
+
+                    10: ip_header_content.header_csum[0] <= received_byte;
+                    11: ip_header_content.header_csum[1] <= received_byte;
+
+                    12: ip_header_content.src_ip[0] <= received_byte;
+                    13: ip_header_content.src_ip[1] <= received_byte;
+                    14: ip_header_content.src_ip[2] <= received_byte;
+                    15: ip_header_content.src_ip[3] <= received_byte;
+
+                    16: ip_header_content.dest_ip[0] <= received_byte;
+                    17: ip_header_content.dest_ip[1] <= received_byte;
+                    18: ip_header_content.dest_ip[2] <= received_byte;
+                    19: ip_header_content.dest_ip[3] <= received_byte;
+                endcase
+
+                if (byte_counter[0] == 1'b0) begin
+                    // If the current byte is even, it is the MSByte of the 16-bit word
+                    current_word[15:8] <= received_byte;
+                end 
+                else begin
+                    // The current byte is odd, so it is the LSByte of the 16-bit word
+                    current_word[7:0] <= received_byte;     // Complete the word
+                    ip_checksum_acc <= ip_checksum_acc + {current_word[15:8], received_byte};
+                end
+
+                if (byte_counter < 19)
+                    byte_counter <= byte_counter + 1;
+                else begin
+                    byte_counter <= 0;
+
+                    // Check if dest_ip matches FPGA's IP
+                    if ({ip_header_content.dest_ip[0:2], received_byte} == FPGA_IP)
+                        state <= IP_CHECK;
+                    else
+                        state <= IDLE;
+                end
+            end else if (state == IP_CHECK) begin
+                // Add the carry-over in the checksum to the bottom 16 bits
+                ip_checksum_calc <= ip_checksum_acc[31:16] + ip_checksum_acc[15:0];
+                // Check if there is still 1 bit of carry-over left over
+                if (ip_checksum_calc[16])
+                    ip_checksum_calc <= ~(ip_checksum_calc[15:0] + 1'b1);
+
+                // Check if checksum is the valid 0x0000
+                if (ip_checksum_calc == 16'h0000)
+                    state <= UDP_HEADER;
+                else
+                    state <= IDLE;
 
             end else if (state == UDP_HEADER) begin
 

@@ -1,14 +1,14 @@
 package eth_types_pkg;
 
     // Ethernet frame header components
-    typedef struct packed {
+    typedef struct {
         byte unsigned dest_mac [6];
         byte unsigned src_mac [6];
         byte unsigned ethertype [2];
     } frame_header;
 
     // IP packet header components
-    typedef struct packed {
+    typedef struct {
         bit [3:0] version;
         bit [3:0] header_len;
         bit [5:0] dscp;
@@ -25,7 +25,7 @@ package eth_types_pkg;
     } ip_header;
 
     // UDP datagram header components
-    typedef struct packed {
+    typedef struct {
         byte unsigned src_port [2];
         byte unsigned dest_port [2];
         byte unsigned udp_len [2];

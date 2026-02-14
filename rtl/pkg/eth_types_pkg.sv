@@ -1,4 +1,4 @@
-package eth_types_pkg
+package eth_types_pkg;
 
     // Ethernet frame header components
     typedef struct packed {

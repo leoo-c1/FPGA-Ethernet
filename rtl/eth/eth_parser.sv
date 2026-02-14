@@ -1,4 +1,4 @@
-import eth_types_pkg::*
+import eth_types_pkg::*;
 
 module eth_parser #(
     parameter FPGA_MAC = 48'h00_1A_2B_3C_4D_5E, // FPGA's MAC address (theoretical)

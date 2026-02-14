@@ -135,6 +135,14 @@ module tb_eth_parser;
     endtask
 
     initial begin
+        clk = 0;
+    end
+
+    always begin
+        #10 clk = ~clk;         // Generate 50MHz clock signal
+    end
+
+    initial begin
         clk = 0;            // Initially, clock is low
         resetn = 0;         // Reset is active
 
@@ -149,8 +157,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F5),
             .task_dest_ip(32'hC0_00_02_92),
             .task_dest_port(16'd5005),
-            .task_payload(32'hDEADBEEF),
-        )
+            .task_payload(32'hDEADBEEF)
+        );
 
         // Wait a bit
         #80;
@@ -162,8 +170,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F5),
             .task_dest_ip(32'hC0_00_02_92),
             .task_dest_port(16'd5005),
-            .task_payload(32'hDEADBEEF),
-        )
+            .task_payload(32'hDEADBEEF)
+        );
 
         // Wait a bit
         #80;
@@ -175,8 +183,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F5),
             .task_dest_ip(32'hC0_00_02_92),
             .task_dest_port(16'd5005),
-            .task_payload(32'hDEADBEEF),
-        )
+            .task_payload(32'hDEADBEEF)
+        );
 
         // Wait a bit
         #80;
@@ -188,8 +196,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F6),
             .task_dest_ip(32'hC0_00_02_92),
             .task_dest_port(16'd5005),
-            .task_payload(32'hDEADBEEF),
-        )
+            .task_payload(32'hDEADBEEF)
+        );
 
         // Wait a bit
         #80;
@@ -201,8 +209,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F5),
             .task_dest_ip(32'hC0_AA_02_92),
             .task_dest_port(16'd5005),
-            .task_payload(32'hDEADBEEF),
-        )
+            .task_payload(32'hDEADBEEF)
+        );
 
         // Wait a bit
         #80;
@@ -214,8 +222,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F5),
             .task_dest_ip(32'hC0_00_02_92),
             .task_dest_port(16'd8001),
-            .task_payload(32'hDEADBEEF),
-        )
+            .task_payload(32'hDEADBEEF)
+        );
 
         // Wait a bit
         #80;
@@ -227,8 +235,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F5),
             .task_dest_ip(32'hC0_00_02_92),
             .task_dest_port(16'd5005),
-            .task_payload(32'hDEADBEEF),
-        )
+            .task_payload(32'hDEADBEEF)
+        );
         #20;
         send_frame (
             .task_dest_mac(48'h00_1A_2B_3C_4D_5E),
@@ -236,12 +244,8 @@ module tb_eth_parser;
             .task_header_csum(16'hE5F5),
             .task_dest_ip(32'hC0_00_02_92),
             .task_dest_port(16'd5005),
-            .task_payload(32'hDEADBEEF),
-        )
-    end
-
-    always begin
-        #10 clk = ~clk;         // Generate 50MHz clock signal
+            .task_payload(32'hDEADBEEF)
+        );
     end
 
 endmodule

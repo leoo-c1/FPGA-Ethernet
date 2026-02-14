@@ -1,4 +1,4 @@
-import eth_types_pkg::*
+import eth_types_pkg::*;
 
 module ethernet_top (
     input logic clk,                    // 50MHz LAN8720 clock
@@ -14,8 +14,8 @@ module ethernet_top (
     output logic payload_last           // Pulses on the last byte of our payload data
     );
 
-    logic [7:0] received_byte,          // The 8-bit data made by combining both data pins' inputs
-    logic byte_valid                    // Pulses for one clock cycle on valid byte
+    logic [7:0] received_byte;          // The 8-bit data made by combining both data pins' inputs
+    logic byte_valid;                   // Pulses for one clock cycle on valid byte
 
     rmii_handler byte_receiver (
         .clk(clk),

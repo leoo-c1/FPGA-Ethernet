@@ -28,11 +28,23 @@ module eth_parser #(
     logic [15:0] dest_port_flat;
     logic [15:0] udp_len_flat;
 
-    assign dest_mac_flat = {>>{frame_header_content.dest_mac}};
+    // Destination MAC
+    assign dest_mac_flat = {frame_header_content.dest_mac[0], frame_header_content.dest_mac[1],
+                            frame_header_content.dest_mac[2], frame_header_content.dest_mac[3],
+                            frame_header_content.dest_mac[4], frame_header_content.dest_mac[5]};
+
+    // Ethertype, low byte is the current received byte at the time of checking this
     assign ethertype_flat = {frame_header_content.ethertype[0], received_byte};
-    assign dest_ip_flat = {>>{ip_header_content.dest_ip}};
-    assign dest_port_flat = {>>{udp_header_content.dest_port}};
-    assign udp_len_flat = {>>{udp_header_content.udp_len}};
+
+    // Destination IP address
+    assign dest_ip_flat = {ip_header_content.dest_ip[0], ip_header_content.dest_ip[1],
+                           ip_header_content.dest_ip[2], ip_header_content.dest_ip[3]};
+
+    // Destination UDP port
+    assign dest_port_flat = {udp_header_content.dest_port[0], udp_header_content.dest_port[1]};
+
+    // UDP length
+    assign udp_len_flat = {udp_header_content.udp_len[0], udp_header_content.udp_len[1]};
 
     logic [16:0] ip_checksum_calc;      // The calculated checksum of the IP header
     logic [31:0] ip_checksum_acc;       // 32 bits to handle overflow carries
@@ -205,9 +217,10 @@ module eth_parser #(
                     payload_valid <= 1'b1;
                     payload <= received_byte;
 
-                    if (byte_counter < udp_len_flat - 16'd9)
+                    if (byte_counter < udp_len_flat - 16'd9) begin
                         byte_counter <= byte_counter + 1;
                         payload_last <= 1'b0;
+                    end
                     else if (byte_counter == udp_len_flat - 16'd9) begin
                         byte_counter <= 0;
                         payload_last <= 1'b1;

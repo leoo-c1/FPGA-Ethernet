@@ -188,16 +188,6 @@ module eth_parser #(
                         7: udp_header_content.udp_csum[1] <= received_byte;
                     endcase
 
-                    if (byte_counter[0] == 1'b0) begin
-                        // If the current byte is even, it is the MSByte of the 16-bit word
-                        current_word[15:8] <= received_byte;
-                    end 
-                    else begin
-                        // The current byte is odd, so it is the LSByte of the 16-bit word
-                        current_word[7:0] <= received_byte;     // Complete the word
-                        udp_checksum_acc <= udp_checksum_acc + {current_word[15:8], received_byte};
-                    end
-
                     if (byte_counter < 7)
                         byte_counter <= byte_counter + 1;
                     else begin

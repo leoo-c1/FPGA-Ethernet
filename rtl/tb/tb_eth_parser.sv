@@ -2,15 +2,15 @@
 
 module tb_eth_parser;
 
-    logic clk,                  // 50MHz LAN8720 clock
-    logic resetn,               // Reset button (active low)
+    logic clk;                  // 50MHz LAN8720 clock
+    logic resetn;               // Reset button (active low)
 
-    logic [7:0] received_byte,  // The byte of data we have received from the LAN8720
-    logic byte_valid,           // Pulses for one clock cycle on valid byte
+    logic [7:0] received_byte;  // The byte of data we have received from the LAN8720
+    logic byte_valid;           // Pulses for one clock cycle on valid byte
 
-    logic [7:0] payload,        // The payload data
-    logic payload_valid,        // Whether we are currently receiving payload data
-    logic payload_last          // Pulses on the last byte of our payload data
+    logic [7:0] payload;        // The payload data
+    logic payload_valid;        // Whether we are currently receiving payload data
+    logic payload_last;         // Pulses on the last byte of our payload data
 
     eth_parser #(
         .FPGA_MAC(48'h00_1A_2B_3C_4D_5E),

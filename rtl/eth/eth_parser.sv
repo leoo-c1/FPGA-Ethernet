@@ -55,9 +55,9 @@ module eth_parser #(
         ip_checksum_calc = ip_checksum_acc[31:16] + ip_checksum_acc[15:0];
         // Check if there is still 1 bit of carry-over left over
         if (ip_checksum_calc[16])
-            ip_checksum_calc = ~(ip_checksum_calc[15:0] + 1'b1);
-        else
-            ip_checksum_calc = ~ip_checksum_calc[15:0];
+            ip_checksum_calc = ip_checksum_calc[15:0] + 1'b1;
+        
+        ip_checksum_calc = {1'b0, ~ip_checksum_calc[15:0]};
     end
 
     logic [15:0] byte_counter = 0;      // Counts the number of bytes we have received

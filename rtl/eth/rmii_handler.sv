@@ -19,14 +19,14 @@ module rmii_handler (
     always_ff @ (posedge clk or negedge resetn) begin
         if (!resetn) begin              // On reset/startup, reset our collected byte
             received_byte <= 8'b0;
-            byte_valid <= 8'b0;
-            bit_counter <= 2'b0;
+            byte_valid <= 1'b0;
+            bit_counter <= 4'b0;
             bit_storage <= 8'b0;
         end else begin
             if (data_valid) begin       // If we are receiving valid data
                 if (bit_counter < max_bit_count - 2) begin
                     bit_storage[bit_counter +: 2] <= {rx1, rx0};
-                    bit_counter <= bit_counter + 2;
+                    bit_counter <= bit_counter + 2'd2;
                     byte_valid <= 1'b0;
                 end else begin
                     received_byte <= {rx1, rx0, bit_storage[5:0]};

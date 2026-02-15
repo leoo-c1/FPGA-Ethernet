@@ -69,6 +69,7 @@ module eth_parser #(
             payload_valid <= 1'b0;
             payload_last <= 1'b0;
             byte_counter <= 0;
+            ip_checksum_acc <= 0;
         end else begin
             if (state == IDLE) begin
                 payload_valid <= 1'b0;
@@ -96,9 +97,12 @@ module eth_parser #(
                         byte_counter <= byte_counter + 1'b1;
                     else begin
                         byte_counter <= 0;
+                        ip_checksum_acc <= 0;
                         // Make sure the destination mac is ours and ethertype is 0x0800 (IPv4)
                         if ((dest_mac_flat == FPGA_MAC) & (ethertype_flat == 16'h0800))
                             state <= IP_HEADER;
+                        else
+                            state <= IDLE;
                     end
                 end
 

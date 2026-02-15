@@ -246,6 +246,9 @@ module tb_eth_parser;
             .task_dest_port(16'd5005),
             .task_payload(32'hDEADBEEF)
         );
+
+        #10_000     // Wait a bit
+        $stop(2);   // Finish the simulation
     end
 
 endmodule

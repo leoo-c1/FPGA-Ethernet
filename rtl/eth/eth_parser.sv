@@ -50,6 +50,16 @@ module eth_parser #(
     logic [31:0] ip_checksum_acc;       // 32 bits to handle overflow carries
     logic [15:0] current_word;          // Temporary holder for the 16-bit word
 
+    always_comb begin
+        // Add any carry-over to the bottom 4 hex digits of the sum
+        ip_checksum_calc = ip_checksum_acc[31:16] + ip_checksum_acc[15:0];
+        // Check if there is still 1 bit of carry-over left over
+        if (ip_checksum_calc[16])
+            ip_checksum_calc = ~(ip_checksum_calc[15:0] + 1'b1);
+        else
+            ip_checksum_calc = ~ip_checksum_calc[15:0];
+    end
+
     logic [15:0] byte_counter = 0;      // Counts the number of bytes we have received
 
     always_ff @ (posedge clk or negedge resetn) begin
@@ -152,27 +162,19 @@ module eth_parser #(
                         byte_counter <= 0;
                         current_word <= 16'b0;
 
-                        // Go to the check state (to check dest_ip and IP checksum)
-                        state <= IP_CHECK;
-                    end
-                end
-            end else if (state == IP_CHECK) begin
-                if (byte_valid) begin
-                    // Add the carry-over in the checksum to the bottom 16 bits
-                    ip_checksum_calc = ip_checksum_acc[31:16] + ip_checksum_acc[15:0];
-                    // Check if there is still 1 bit of carry-over left over
-                    if (ip_checksum_calc[16])
-                        ip_checksum_calc = ~(ip_checksum_calc[15:0] + 1'b1);
-
-                    // Check if checksum is the valid 0x0000 and dest_ip matches the FPGA's IP
-                    if ((ip_checksum_calc == 16'h0000) & (dest_ip_flat == FPGA_IP))
+                        // Go to the UDP header state
                         state <= UDP_HEADER;
-                    else
-                        state <= IDLE;
+                    end
                 end
 
             end else if (state == UDP_HEADER) begin
                 if (byte_valid) begin
+                    if (byte_counter == 0) begin
+                        // Check if checksum is the valid 0x0000 and dest_ip matches the FPGA's IP
+                        if (~(ip_checksum_calc == 16'h0000) | ~(dest_ip_flat == FPGA_IP))
+                            state <= IDLE;
+                    end
+
                     // Assign bytes based on the current byte counter
                     case (byte_counter)
                         0: udp_header_content.src_port[0] <= received_byte;

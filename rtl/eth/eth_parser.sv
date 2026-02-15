@@ -93,7 +93,7 @@ module eth_parser #(
                         frame_header_content.ethertype[byte_counter-12] <= received_byte;
 
                     if (byte_counter < 13)
-                        byte_counter <= byte_counter + 1;
+                        byte_counter <= byte_counter + 1'b1;
                     else begin
                         byte_counter <= 0;
                         // Make sure the destination mac is ours and ethertype is 0x0800 (IPv4)
@@ -157,7 +157,7 @@ module eth_parser #(
                     end
 
                     if (byte_counter < 19)
-                        byte_counter <= byte_counter + 1;
+                        byte_counter <= byte_counter + 1'b1;
                     else begin
                         byte_counter <= 0;
                         current_word <= 16'b0;
@@ -191,7 +191,7 @@ module eth_parser #(
                     endcase
 
                     if (byte_counter < 7)
-                        byte_counter <= byte_counter + 1;
+                        byte_counter <= byte_counter + 1'b1;
                     else begin
                         byte_counter <= 0;
                         current_word <= 16'b0;
@@ -210,7 +210,7 @@ module eth_parser #(
                     payload <= received_byte;
 
                     if (byte_counter < udp_len_flat - 16'd9) begin
-                        byte_counter <= byte_counter + 1;
+                        byte_counter <= byte_counter + 1'b1;
                         payload_last <= 1'b0;
                     end
                     else if (byte_counter == udp_len_flat - 16'd9) begin
@@ -227,7 +227,7 @@ module eth_parser #(
                     payload_valid <= 1'b0;
 
                     if (byte_counter < 4)
-                        byte_counter <= byte_counter + 1;
+                        byte_counter <= byte_counter + 1'b1;
                     else
                         state <= IDLE;
                 end

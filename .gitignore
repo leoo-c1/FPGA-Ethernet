@@ -3,6 +3,7 @@ incremental_db/
 output_files/
 simulation/
 greybox_tmp/
+.vscode/
 /hc_output
 /.qsys_edit
 *.qws
@@ -29,3 +30,4 @@ greybox_tmp/
 *.jdi
 *.rbf
 *.bak
+*.json

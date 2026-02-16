@@ -2,7 +2,7 @@ import eth_types_pkg::*;
 
 module eth_parser #(
     parameter FPGA_MAC = 48'h00_1A_2B_3C_4D_5E, // FPGA's MAC address (theoretical)
-    parameter FPGA_IP = 32'hC0_00_02_92,        // FPGA's IP address (theoretical)
+    parameter FPGA_IP = 32'hC0_00_02_92,        // FPGA's IP address of 192.0.2.146 (theoretical)
     parameter FPGA_PORT = 16'd5005              // FPGA's UDP port (theoretical)
     ) (
     input logic clk,                    // 50MHz LAN8720 clock

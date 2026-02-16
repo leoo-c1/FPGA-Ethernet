@@ -9,6 +9,8 @@ module ethernet_top (
     input logic rx0,                    // The data on the first receiving pin
     input logic rx1,                    // The data on the second receiving pin
 
+    input logic tx_en,                  // TX enable pin, drive to low to prevent FPGA transmission
+
     output logic [7:0] payload,         // The payload data
     output logic payload_valid,         // Whether we are currently receiving payload data
     output logic payload_last           // Pulses on the last byte of our payload data
@@ -16,6 +18,8 @@ module ethernet_top (
 
     logic [7:0] received_byte;          // The 8-bit data made by combining both data pins' inputs
     logic byte_valid;                   // Pulses for one clock cycle on valid byte
+
+    assign tx_en = 1'b0;
 
     rmii_handler byte_receiver (
         .clk(clk),

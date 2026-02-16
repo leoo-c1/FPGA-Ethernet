@@ -8,7 +8,18 @@ int main() {
 
     if (startup == 0) {
         std::cout << "Winsock initialised." << std::endl;
-        WSACleanup();
+
+        SOCKET data_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+        if (data_socket == INVALID_SOCKET) {
+            std::cout << "Socket creation failed, error code: " << WSAGetLastError() << std::endl;
+            WSACleanup();
+        }
+
+        else {
+            std::cout << "Socket created." << std::endl;
+            WSACleanup();
+        }
     }
 
     else {

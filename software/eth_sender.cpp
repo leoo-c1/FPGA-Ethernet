@@ -13,13 +13,14 @@ int main() {
 
         if (data_socket == INVALID_SOCKET) {
             std::cout << "Socket creation failed, error code: " << WSAGetLastError() << std::endl;
-            WSACleanup();
         }
 
         else {
             std::cout << "Socket created." << std::endl;
-            WSACleanup();
+            closesocket(data_socket);
         }
+
+        WSACleanup();
     }
 
     else {

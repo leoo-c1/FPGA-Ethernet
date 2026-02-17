@@ -31,4 +31,5 @@ greybox_tmp/
 *.rbf
 *.bak
 *.json
+*.qsys_edit
 eth_sender.exe

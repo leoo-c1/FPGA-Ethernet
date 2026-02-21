@@ -55,7 +55,8 @@ The project runs on the Intel Cyclone IV EP4CE6E22C8N FPGA using the RZ-EasyFPGA
 | `rx0` | **PIN_76** | **RX0** | RMII Data Bit 0 |
 | `rx1` | **PIN_77** | **RX1** | RMII Data Bit 1 |
 | `data_valid` | **PIN_83** | **CRS** | Carrier Sense / Data Valid |
-| `resetn` | **PIN_25** | - | System Reset (Active Low) |
+| `tx_en` | **PIN_74** | **TX-EN** | Transmit Enable (kept low) |
+| `resetn` | **PIN_25** | - | System Reset (active low) |
 
 ## Software Implementation
 
